@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 
 namespace AdventOfCode2020
@@ -18,6 +19,7 @@ namespace AdventOfCode2020
             string filePathDay4 = @"C:\Users\Filip\source\repos\AdventOfCode2020\AdventOfCode2020\Inputs\Day4.txt";
             //string filePathDay4E = @"C:\Users\Filip\source\repos\AdventOfCode2020\AdventOfCode2020\Inputs\Day4E.txt";
             string filePathDay5 = @"C:\Users\Filip\source\repos\AdventOfCode2020\AdventOfCode2020\Inputs\Day5.txt";
+            string filePathDay6 = @"C:\Users\Filip\source\repos\AdventOfCode2020\AdventOfCode2020\Inputs\Day6.txt";
 
             #endregion
 
@@ -55,6 +57,13 @@ namespace AdventOfCode2020
 
             Console.WriteLine($" Day 5 Challenge 1: {GetHighestBoardingID(ConvertTextFileToStringList(filePathDay5))}");
             Console.WriteLine($" Day 5 Challenge 2: {GetMyBoardingID(ConvertTextFileToStringList(filePathDay5))}");
+
+            #endregion
+
+            #region Day 6
+
+            Console.WriteLine($" Day 6 Challenge 1: {CountNumberOfYesses(NumberOfYesPergroup(ConvertTextFileToStringList2(filePathDay6)))}");
+            Console.WriteLine($" Day 6 Challenge 2: {CountNumberOfYesses(NumberOfAgreedYesPergroup(ConvertTextFileToStringList2(filePathDay6)))}");
 
             #endregion
 
@@ -103,7 +112,6 @@ namespace AdventOfCode2020
                     }
 
                     formattedInputList.Add(fullPassportInfo);
-                    //count++;
                 }
             }
             //foreach (var passport in formattedInputList)
@@ -622,6 +630,105 @@ namespace AdventOfCode2020
             }
 
             return myBoardingID;
+        }
+
+        #endregion
+
+        #region Day 6
+
+        static List <int> NumberOfYesPergroup(List <string> answers) 
+        {
+            List <int> numberOfYesPerGroup = new List<int>();
+
+            for (int i = 0; i < answers.Count; i++)
+            {
+                string justTheAnswer = answers[i].Replace(" ", "");
+                int numberOfYesInThisGroup = 0;
+
+                for (int j = 0; j < justTheAnswer.Length; j++)
+                {
+                    if (!justTheAnswer.Substring(j+1).Contains(justTheAnswer[j]))
+                    {
+                        numberOfYesInThisGroup++;
+                    }
+                }
+                numberOfYesPerGroup.Add(numberOfYesInThisGroup);
+            }
+            return numberOfYesPerGroup;
+        }
+
+        static int CountNumberOfYesses(List <int> numberOfYesPerAnswer) 
+        {
+            int numberOfYesses = 0;
+
+            foreach (int number in numberOfYesPerAnswer)
+            {
+                numberOfYesses += number;
+            }
+            return numberOfYesses;
+        }
+
+        static List<int> NumberOfAgreedYesPergroup(List<string> answers)
+        {
+            List<int> numberOfAgreedYesPerGroup = new List<int>();
+
+            for (int i = 0; i < answers.Count; i++)
+            {
+                int numberOfAgreedYesInThisGroup = 0;
+                string [] thisGroupsAnswersRaw = answers[i].Split(" ");
+                List<string> thisGroupsAnswers = new List<string>();
+
+                foreach (string answer in thisGroupsAnswersRaw)
+                {
+                    if (answer.Length != 0)
+                    {
+                        thisGroupsAnswers.Add(answer);
+                    }
+                }
+
+                List<char> listOfVerifiedAgreedAnswers = new List<char>();
+                List<char> listOfLettersInFirstPersonsAnswer = new List<char>();
+                List<char> listOfNotAgreeableAsnwersInFirstPersonsAnswer = new List<char>();
+
+                if (thisGroupsAnswers.Count > 1)
+                {
+                    foreach (char answer in thisGroupsAnswers[0])
+                    {
+                        listOfLettersInFirstPersonsAnswer.Add(answer);
+                    }
+                    for (int j = 1; j < thisGroupsAnswers.Count-1; j++)
+                    {
+                        foreach (char answer in thisGroupsAnswers[j])
+                        {
+                            if (!listOfNotAgreeableAsnwersInFirstPersonsAnswer.Contains(answer) && !listOfLettersInFirstPersonsAnswer.Contains(answer))
+                            {
+                                foreach (char letter in listOfLettersInFirstPersonsAnswer)
+                                {
+                                    if (!thisGroupsAnswers[j].Contains(letter))
+                                    {
+                                        listOfNotAgreeableAsnwersInFirstPersonsAnswer.Add(letter);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    foreach (char answer in thisGroupsAnswers[thisGroupsAnswers.Count - 1])
+                    {
+                        if (listOfLettersInFirstPersonsAnswer.Contains(answer) && !listOfNotAgreeableAsnwersInFirstPersonsAnswer.Contains(answer))
+                        {
+                            listOfVerifiedAgreedAnswers.Add(answer);
+                        }
+                    }
+                    numberOfAgreedYesInThisGroup = listOfVerifiedAgreedAnswers.Count;
+                }
+                else
+                {
+                    numberOfAgreedYesInThisGroup += thisGroupsAnswers[0].Length;
+                }
+
+                numberOfAgreedYesPerGroup.Add(numberOfAgreedYesInThisGroup);
+            }
+            return numberOfAgreedYesPerGroup;
         }
 
         #endregion
